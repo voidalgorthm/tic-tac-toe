@@ -1,0 +1,15 @@
+:root {
+    font-size: 62.5%;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+body div {
+    padding: 1.5rem;
+    z-index: 0;
+}
