@@ -1,37 +1,63 @@
 :root {
     font-size: 62.5%;
-    --default-theme-bgcolor: #FFF;
-    --default-theme-color: #000;
-    --fade-theme-bgcolor: #cbd5e1;
-    --general-theme-bgcolor: #f43f5e;
-    --division-theme-bgcolor: rgba(244, 63, 94, 0.3);
-    --valid-theme-color: #22c55e;
-    --invalid-theme-color: #dc2626;
+    --default-bgcolor: #FFF;
+    --default-color: #222222;
+    --fade-bgcolor: #cbd5e1;
+    --general-bgcolor: #db331d;
+    --button-bgcolor: #00a4b6;
+    --focus-bgcolor: #1f2937;
+    --focus-color: #f8fafc;
+    --division-bgcolor: rgba(244, 63, 94, 0.3);
+    --valid-color: #22c55e;
+    --invalid-color: #dc2626;
     --general-theme-font: monospace, serif, sans-serif;
 
     --border-radius: 2rem;
 }
 
-* {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     text-align: center;
 }
 
+select {
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    padding: 0 1em 0 0;
+    margin: 0;
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: inherit;
+    line-height: inherit;
+    outline: none;
+}
+
 button {
-    border-radius: var(--border-radius);
+    background-color: var(--button-bgcolor);
+    outline-color: var(--general-bgcolor);
     width: 100%;
     height: 100%;
     border: 0;
-    outline-color: var(--general-theme-bgcolor);
+    border-radius: var(--border-radius);
 }
+
+button:focus {
+    background-color: var(--focus-bgcolor);
+    color: var(--focus-color);
+}   
 
 button:active {
     transform: scale(0.97);
 }
 
 .container {
+    color: var(--default-color);
     min-height: 100vh;
     z-index: 0;
     display: flex;
@@ -44,7 +70,7 @@ button:active {
 }
 
 div.content {
-    background-color: var(--fade-theme-bgcolor);
+    background-color: var(--fade-bgcolor);
     /* min-height: 90%; */
     display: flex;
     flex-direction: column;
@@ -54,7 +80,7 @@ div.content {
 }
 
 div.wrapper {
-    background-color: var(--default-theme-bgcolor);
+    background-color: var(--default-bgcolor);
     border-radius: var(--border-radius);
     max-width: 100%;
     max-height: 100%;
@@ -66,9 +92,49 @@ div.wrapper {
     grid-template-rows: auto 1fr auto;
 }
 
-div.selection {
+div.top {
     padding: 1rem;
 }
+
+div.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+select,
+div.selection:after {
+    grid-area: select;
+}
+
+div.selection {
+    width: 100%;
+    min-width: 10ch;
+    max-width: 20ch;
+    border: 1px solid #777;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 1.6rem;
+    cursor: pointer;
+    background-color: var(--default-bgcolor);
+    display: grid;
+    grid-template-areas: "select";
+    align-items: center;
+}
+
+div.selection::after {
+    content: "";
+    width: 1.5rem;
+    height: 1rem;
+    background-color: var(--general-bgcolor);
+    clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+    justify-self: end;
+}
+
+div.title {
+    font-size: 2rem;
+}
+
 
 div.faction {
     display: flex;
@@ -80,7 +146,7 @@ button.btn-faction {
 }
 
 div.game {
-    background-color: var(--general-theme-bgcolor);
+    background-color: var(--general-bgcolor);
     /* height: 23rem; */
     flex: 1;
 }
@@ -93,7 +159,7 @@ button.btn-controls {
 
 div.header,
 div.footer {
-    background-color: var(--general-theme-bgcolor);
+    background-color: var(--general-bgcolor);
     min-height: 5%;
     display: flex;
     align-items: center;

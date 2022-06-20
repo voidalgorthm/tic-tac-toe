@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="tic-tac-toe.css">
     <script src="tic-tac-toe.js"></script>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -15,8 +17,20 @@
         </div>
         <div class="content">
             <div class="wrapper">
-                <div class="selection">
-                    <p>Difficulty</p>
+                <div class="top">
+                    <div class="nav">
+                        <div class="selection">
+                            <select name="difficulty" id="">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Impossible">Impossible</option>
+                                <option value="Friend">vs. Friend</option>
+                            </select>
+                        </div>
+                        <div class="title">
+                            Tic-Tac-Toe
+                        </div>
+                    </div>
                     <div class="faction">
                         <button class="btn-faction">X</button>
                         <button class="btn-faction">O</button>
@@ -35,4 +49,5 @@
         </div>
     </div>
 </body>
+
 </html>
