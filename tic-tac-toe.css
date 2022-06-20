@@ -1,5 +1,15 @@
 :root {
     font-size: 62.5%;
+    --default-theme-bgcolor: #FFF;
+    --default-theme-color: #000;
+    --fade-theme-bgcolor: #cbd5e1;
+    --general-theme-bgcolor: #f43f5e;
+    --division-theme-bgcolor: rgba(244, 63, 94, 0.3);
+    --valid-theme-color: #22c55e;
+    --invalid-theme-color: #dc2626;
+    --general-theme-font: monospace, serif, sans-serif;
+    
+    --border-radius: 2rem;
 }
 
 * {
@@ -9,7 +19,99 @@
     text-align: center;
 }
 
-body div {
+button {
+    border-radius: var(--border-radius);
+    width: 5rem;
+    height: 5rem;
+}
+
+.container {
+    font-size: calc(1rem + 0.5vw);
+    min-height: 100vh;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.container div {
     padding: 1.5rem;
     z-index: 0;
 }
+
+div.content {
+    background-color: var(--fade-theme-bgcolor);
+    min-height: calc(100% - 5vh - 5vh);
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+div.wrapper {
+    background-color: var(--default-theme-bgcolor);
+    border-radius: var(--border-radius);
+    max-width: 100%;
+    max-height: 100%;
+    width: max(40vw, 40rem);
+    height: max(40vw, 40rem);
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+}
+
+div.selection {
+
+}
+
+div.game {
+    background-color: var(--general-theme-bgcolor);
+    flex: 1;
+}
+
+div.controls {
+    
+}
+
+div.header,
+div.footer {
+    background-color: var(--general-theme-bgcolor);
+    min-height: 5vh;
+    display: flex;
+    align-items: center;
+    font-weight: bolder;
+}
+
+div.header {
+    justify-content: center;
+}
+
+div.footer {
+    justify-content: center;
+}
+
+/* @media screen and (max-width: 900px) {
+    div.container {
+        width: auto;
+        height: auto;
+    }
+    
+    div.wrapper {
+        width: 90vw;
+        height: auto;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    div.container {
+        width: auto;
+        height: auto;
+    }
+    
+    div.wrapper {
+        width: 100vw;
+        height: auto;
+    }
+} */
