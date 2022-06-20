@@ -8,7 +8,7 @@
     --valid-theme-color: #22c55e;
     --invalid-theme-color: #dc2626;
     --general-theme-font: monospace, serif, sans-serif;
-    
+
     --border-radius: 2rem;
 }
 
@@ -21,12 +21,17 @@
 
 button {
     border-radius: var(--border-radius);
-    width: 5rem;
-    height: 5rem;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    outline-color: var(--general-theme-bgcolor);
+}
+
+button:active {
+    transform: scale(0.97);
 }
 
 .container {
-    font-size: calc(1rem + 0.5vw);
     min-height: 100vh;
     z-index: 0;
     display: flex;
@@ -34,14 +39,13 @@ button {
 }
 
 .container div {
-    padding: 1.5rem;
+    padding: 1rem;
     z-index: 0;
 }
 
 div.content {
     background-color: var(--fade-theme-bgcolor);
-    min-height: calc(100% - 5vh - 5vh);
-    padding: 0 1rem;
+    /* min-height: 90%; */
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -54,8 +58,8 @@ div.wrapper {
     border-radius: var(--border-radius);
     max-width: 100%;
     max-height: 100%;
-    width: max(40vw, 40rem);
-    height: max(40vw, 40rem);
+    width: max(80ch, 40rem);
+    height: max(80ch, 40rem);
     padding: 0;
     display: grid;
     grid-template-columns: 1fr;
@@ -63,22 +67,34 @@ div.wrapper {
 }
 
 div.selection {
+    padding: 1rem;
+}
 
+div.faction {
+    display: flex;
+    gap: 1rem;
+}
+
+button.btn-faction {
+    height: 4rem;
 }
 
 div.game {
     background-color: var(--general-theme-bgcolor);
+    /* height: 23rem; */
     flex: 1;
 }
 
-div.controls {
-    
+div.controls {}
+
+button.btn-controls {
+    height: 4rem;
 }
 
 div.header,
 div.footer {
     background-color: var(--general-theme-bgcolor);
-    min-height: 5vh;
+    min-height: 5%;
     display: flex;
     align-items: center;
     font-weight: bolder;
