@@ -12,58 +12,50 @@
 
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Tic-Tac-Toe</h1>
-        </div>
-        <div class="content">
-            <div class="wrapper">
-                <div class="top">
-                    <div class="nav">
-                        <div class="selection">
-                            <select name="difficulty" id="">
-                                <option value="Easy">Easy</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Impossible">Impossible</option>
-                                <option value="Friend">vs. Friend</option>
-                            </select>
-                        </div>
-                        <div class="title">
-                            Tic-Tac-Toe
-                        </div>
+        <div class="wrapper">
+            <div class="top">
+                <div class="nav">
+                    <div class="selection">
+                        <select name="difficulty" id="">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Impossible">Impossible</option>
+                            <option value="Friend">vs. Friend</option>
+                        </select>
                     </div>
-                    <div class="faction">
-                        <button class="btn-faction">X</button>
-                        <button class="btn-faction">O</button>
+                    <div class="title">
+                        Tic-Tac-Toe
                     </div>
                 </div>
-                <div class="board">
-                    <table class="game">
-                        <tbody>
-                            <tr>
-                                <td><button class="btn-game">1</button></td>
-                                <td><button class="btn-game">2</button></td>
-                                <td><button class="btn-game">3</button></td>
-                            </tr>
-                            <tr>
-                                <td><button class="btn-game">4</button></td>
-                                <td><button class="btn-game">5</button></td>
-                                <td><button class="btn-game">6</button></td>
-                            </tr>
-                            <tr>
-                                <td><button class="btn-game">7</button></td>
-                                <td><button class="btn-game">8</button></td>
-                                <td><button class="btn-game">9</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="controls">
-                    <button class="btn-controls">Z</button>
+                <div class="faction">
+                    <button class="btn-faction selected" value="X">X</button>
+                    <button class="btn-faction" value="O">O</button>
                 </div>
             </div>
-        </div>
-        <div class="footer">
-            <h3>Copyright © codexeger 2022</h3>
+            <div class="board">
+                <table class="game">
+                    <tbody>
+                        <tr>
+                            <td><button class="btn-game"><span></span></button></td>
+                            <td><button class="btn-game"></button></td>
+                            <td><button class="btn-game"></button></td>
+                        </tr>
+                        <tr>
+                            <td><button class="btn-game"></button></td>
+                            <td><button class="btn-game"></button></td>
+                            <td><button class="btn-game"></button></td>
+                        </tr>
+                        <tr>
+                            <td><button class="btn-game"></button></td>
+                            <td><button class="btn-game"></button></td>
+                            <td><button class="btn-game"></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bottom">
+                <button class="btn-controls">Z</button>
+            </div>
         </div>
     </div>
 </body>

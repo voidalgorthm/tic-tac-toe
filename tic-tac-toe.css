@@ -12,7 +12,7 @@
     --invalid-color: #dc2626;
     --general-theme-font: monospace, serif, sans-serif;
 
-    --border-radius: 2rem;
+    --border-radius: 1rem;
 }
 
 *,
@@ -56,27 +56,20 @@ button:active {
     transform: scale(0.97);
 }
 
-.container {
-    color: var(--default-color);
-    min-height: 100vh;
-    z-index: 0;
-    display: flex;
-    flex-direction: column;
-}
-
 .container div {
     padding: 1rem;
     z-index: 0;
 }
 
-div.content {
+div.container {
     background-color: var(--fade-bgcolor);
-    /* min-height: 90%; */
+    color: var(--default-color);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    flex: 1;
     align-items: center;
     justify-content: center;
+    flex: 1;
 }
 
 div.wrapper {
@@ -189,7 +182,7 @@ button.btn-game {
     border-radius: 0;
 }
 
-div.controls {}
+/* div.bottom {} */
 
 button.btn-controls {
     height: 4rem;
@@ -204,13 +197,6 @@ div.footer {
     font-weight: bolder;
 }
 
-div.header {
-    justify-content: center;
-}
-
-div.footer {
-    justify-content: center;
-}
 
 /* @media screen and (max-width: 900px) {
     div.container {
