@@ -52,7 +52,7 @@ button:focus {
     color: var(--focus-color);
 }
 
-button:active {
+button:active:not(:disabled) {
     transform: scale(0.97);
 }
 
@@ -187,16 +187,6 @@ button.btn-game {
 button.btn-controls {
     height: 4rem;
 }
-
-div.header,
-div.footer {
-    background-color: var(--general-bgcolor);
-    min-height: 5%;
-    display: flex;
-    align-items: center;
-    font-weight: bolder;
-}
-
 
 /* @media screen and (max-width: 900px) {
     div.container {
