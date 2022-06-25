@@ -179,7 +179,9 @@ table tr td:last-child {
 
 button.btn-game {
     background-color: var(--general-bgcolor);
+    color: var(--default-color);
     border-radius: 0;
+    font-size: 2rem;
 }
 
 /* div.bottom {} */

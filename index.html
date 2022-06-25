@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe</title>
     <link rel="stylesheet" href="tic-tac-toe.css">
-    <script src="tic-tac-toe.js"></script>
+    <script src="tic-tac-toe.js" defer></script>
 </head>
 
 <body>
@@ -16,11 +16,11 @@
             <div class="top">
                 <div class="nav">
                     <div class="selection">
-                        <select name="difficulty" id="">
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Impossible">Impossible</option>
-                            <option value="Friend">vs. Friend</option>
+                        <select name="opponent" id="opponent">
+                            <option value="easy" selected>Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="impossible">Impossible</option>
+                            <option value="player">Player</option>
                         </select>
                     </div>
                     <div class="title">
@@ -28,8 +28,8 @@
                     </div>
                 </div>
                 <div class="faction">
-                    <button class="btn-faction selected" value="X">X</button>
-                    <button class="btn-faction" value="O">O</button>
+                    <button id="x" class="btn-faction selected" value="X">X</button>
+                    <button id="o" class="btn-faction" value="O">O</button>
                 </div>
             </div>
             <div class="board">
@@ -54,7 +54,7 @@
                 </table>
             </div>
             <div class="bottom">
-                <button class="btn-controls">Z</button>
+                <button class="btn-controls" value="reset">Reset</button>
             </div>
         </div>
     </div>
