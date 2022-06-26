@@ -2,40 +2,45 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const Player = (sign, sentient) => {
-    let _sign = sign;
+const Player = (faction, sentient) => {
+    let _faction = faction;
     let _sentient = sentient;
-    const getSign = () => _sign;
+    const getFaction = () => _faction;
     const getSentient = () => _sentient;
-    const setSign = (sign, sentient = false) => {
-        _sign = sign;
+    const setFaction = (faction, sentient = false) => {
+        _faction = faction;
         _sentient = sentient;
         const buttons = document.querySelectorAll('button.btn-faction');
         buttons.forEach(button => {
-            if (button.value === sign) {
+            if (button.value === faction) {
                 if (sentient) button.classList.add('selected');
                 else button.classList.remove('selected');
             }
         });
     }
+
+    /* const reflectFaction = () => {
+        
+    } */
+
     return {
-        getSign,
+        getFaction,
         getSentient,
-        setSign
+        setFaction,
+        // reflectFaction,
     }
 }
 
 const gameBoard = (() => {
     let _board = [...Array(9)];
-    const getTiles = (num) => _board[num];
     const getBoard = () => _board;
+    const getTiles = (num) => _board[num];
     const setTiles = (num, player) => {
         const gameTiles = document.querySelectorAll(`button.btn-game`);
-        const gameTile = gameTiles.item(`${num + 1})`);
-        console.log(gameTile);
+        const gameTile = gameTiles.item(num);
         // gameTile.classList.add('marked');
-        gameTile.textContent = player.getSign();
-        _board[num] = player.getSign();
+        gameTile.textContent = player.getFaction();
+        _board[num] = player.getFaction();
         gameTile.setAttribute('disabled', true);
     }
 
@@ -43,18 +48,141 @@ const gameBoard = (() => {
         _board = _board.map(tile => tile = undefined);
     }
 
+    const getUnmarkedTiles = () => {
+        let tiles = [];
+        for (let i = 0; i < _board.length; i++) {
+            if (_board[i] === undefined) tiles.push(i);
+        }
+        return tiles;
+    }
+
+    const setTilesAi = (num, player) => {
+        if (player === undefined) {
+            _board[num] = undefined;
+            return;
+        }
+        _board[num] = player.getFaction();
+    }
+
     return {
         getTiles,
         setTiles,
         clearTiles,
-        getBoard
+        getBoard,
+        getUnmarkedTiles,
+        setTilesAi
     };
 })();
+
+const minimaxAiPercent = ((percentage) => {
+
+    let aiPrecision = percentage;
+
+    const setAiPercentage = (percentage) => {
+        aiPrecision = percentage;
+    }
+    const getAiPercentage = () => {
+        return aiPrecision;
+    }
+
+    const chooseTile = () => {
+        const value = Math.floor(Math.random() * (100 + 1));
+
+        let choice = null;
+        if (value <= aiPrecision) {
+            console.log('Ai is choosing the best choice');
+            choice = minimax(gameBoard, gameController.getAiPlayer()).index;
+            const field = gameBoard.getTiles(choice);
+            if (field !== undefined) return "error";
+        }
+        else {
+            console.log('Ai may choose the best choice');
+            const unmarkedTiles = gameBoard.getUnmarkedTiles();
+            let averageMove = Math.floor(Math.random() * unmarkedTiles.length);
+            choice = unmarkedTiles[averageMove];
+        }
+        return choice;
+    }
+
+    const findBestMove = (moves, player) => {
+        let bestMove;
+        if (player === gameController.getAiPlayer()) {
+            let bestScore = -10000;
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i].score > bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        } else {
+            let bestScore = 10000;
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i].score < bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        }
+        return moves[bestMove];
+    }
+
+    const minimax = (newBoard, player) => {
+
+        let unmarked = newBoard.getUnmarkedTiles();
+
+        if (gameController.validateDraw(newBoard)) {
+            return {
+                score: 0
+            };
+        }
+        else if (gameController.validateWin(newBoard)) {
+            if (player.getFaction() == gameController.getHumanPlayer().getFaction()) {
+                return {
+                    score: 10
+                };
+            }
+            else if (player.getFaction() == gameController.getAiPlayer().getFaction()) {
+                return {
+                    score: -10
+                };
+            }
+        }
+
+        let moves = [];
+
+        for (let i = 0; i < unmarked.length; i++) {
+            let move = {};
+            move.index = unmarked[i];
+
+            newBoard.setTilesAi(unmarked[i], player);
+
+            if (player.getFaction() === gameController.getAiPlayer().getFaction()) {
+                let result = minimax(newBoard, gameController.getHumanPlayer());
+                move.score = result.score;
+            }
+            else {
+                let result = minimax(newBoard, gameController.getAiPlayer());
+                move.score = result.score;
+            }
+
+            newBoard.setTilesAi(unmarked[i], undefined);
+            moves.push(move);
+        }
+
+        return findBestMove(moves, player);
+    }
+    return {
+        minimax,
+        chooseTile,
+        getAiPercentage,
+        setAiPercentage
+    }
+})(0);
 
 const gameController = (() => {
     const _humanPlayer = Player('X');
     const _aiPlayer = Player('O')
-    // const _aiLogic = minimaxAiLogic;
+    const _aiLogic = minimaxAiPercent;
 
     const getHumanPlayer = () => _humanPlayer;
     const getAiPlayer = () => _aiPlayer;
@@ -63,11 +191,10 @@ const gameController = (() => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    const switchFaction = (sign) => {
-        if (sign === 'X') _humanPlayer.setSign('X', true), _aiPlayer.setSign('O');
-        else if (sign === 'O') _humanPlayer.setSign('O', true), _aiPlayer.setSign('X');
-        else throw 'Incorrect sign';
-        displayController.disableTiles;
+    const switchFaction = (faction) => {
+        if (faction === 'X') _humanPlayer.setFaction('X', true), _aiPlayer.setFaction('O');
+        else if (faction === 'O') _humanPlayer.setFaction('O', true), _aiPlayer.setFaction('X');
+        else throw 'Incorrect faction';
     }
 
     const _validateRows = (board) => {
@@ -117,10 +244,11 @@ const gameController = (() => {
         const tile = gameBoard.getTiles(num);
         if (tile === undefined) {
             gameBoard.setTiles(num, _humanPlayer);
+
             if (validateWin(gameBoard)) {
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
-                    gameEnd(_humanPlayer.getSign());
+                    gameEnd(_humanPlayer.getFaction());
                 })();
             }
             else if (validateDraw(gameBoard)) {
@@ -144,12 +272,12 @@ const gameController = (() => {
     }
 
     const aiTurn = () => {
-        const num = _aiLogic.chooseField();
+        const num = _aiLogic.chooseTile();
         gameBoard.setTiles(num, _aiPlayer);
         if (validateWin(gameBoard)) {
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
-                gameEnd(_aiPlayer.getSign())
+                gameEnd(_aiPlayer.getFaction())
             })();
 
         }
@@ -161,7 +289,7 @@ const gameController = (() => {
         }
     }
 
-    const gameEnd = function (sign) {
+    const gameEnd = function (faction) {
 
         /* const card = document.querySelector('.card');
         card.classList.remove('unblur');
@@ -169,14 +297,14 @@ const gameController = (() => {
 
         const winElements = document.querySelectorAll('.win p')
 
-        if (sign == "Draw") {
+        if (faction == "Draw") {
             winElements[3].classList.remove('hide');
             console.log("Its a draw");
         }
         else {
-            console.log(`The winner is player ${sign}`);
+            console.log(`The winner is player ${faction}`);
             winElements[0].classList.remove('hide');
-            if(sign.toLowerCase() == 'x'){
+            if(faction.toLowerCase() == 'x'){
                 winElements[1].classList.remove('hide');
             }
             else{
@@ -184,32 +312,32 @@ const gameController = (() => {
             }
         } */
         console.log('end');
-        displayController.disableTiles;
+        // displayController.disableTiles;
     }
 
     const restart = async function () {
 
-        const card = document.querySelector('.card');
-        const winElements = document.querySelectorAll('.win p');
+        // const card = document.querySelector('.card');
+        // const winElements = document.querySelectorAll('.win p');
 
-        card.classList.add('unblur');
+        // card.classList.add('unblur');
 
         gameBoard.clearTiles();
         displayController.clearTiles();
-        if (_humanPlayer.getSign() == 'O') {
+        if (_humanPlayer.getFaction() == 'O') {
             aiTurn();
         }
-        console.log('restart');
-        console.log(minimaxAiLogic.getAiPercentage());
-        displayController.enableTiles;
+        displayController.enableTiles();
+        console.log('reset');
+        console.log(minimaxAiPercent.getAiPercentage());
 
 
-        card.classList.remove('blur');
-
-        winElements.forEach(element => {
-            element.classList.add('hide');
-        });
-        document.body.removeEventListener('click', gameController.restart);
+        // card.classList.remove('blur');
+        /* 
+                winElements.forEach(element => {
+                    element.classList.add('hide');
+                });
+                document.body.removeEventListener('click', gameController.restart); */
 
     }
 
@@ -227,23 +355,23 @@ const gameController = (() => {
 const displayController = (() => {
     const gameTiles = [...(document.querySelectorAll('button.btn-game'))];
     const opponent = document.querySelector('select#opponent');
-    const controls = document.querySelectorAll('button.btn-controls');
+    const reset = document.querySelector('button#reset');
     const x = document.querySelector('#x');
     const o = document.querySelector('#o');
+
+    const _changePlayerFaction = (faction) => {
+        gameController.switchFaction(faction);
+        gameController.restart();
+    }
 
     const _changeOpponent = (event) => {
         const difficulty = event.target.value;
         switch (difficulty) {
-            case 'easy': minimaxAiLogic.setAiPercentage(0); break;
-            case 'medium': minimaxAiLogic.setAiPercentage(75); break;
-            case 'impossible': minimaxAiLogic.setAiPercentage(100); break;
+            case 'easy': minimaxAiPercent.setAiPercentage(0); break;
+            case 'medium': minimaxAiPercent.setAiPercentage(75); break;
+            case 'impossible': minimaxAiPercent.setAiPercentage(100); break;
             case 'player': console.log('fix lol'); break;
         }
-        gameController.restart();
-    }
-
-    const _changePlayerSign = (sign) => {
-        gameController.switchFaction(sign);
         gameController.restart();
     }
 
@@ -252,26 +380,28 @@ const displayController = (() => {
     }
 
     const disableTiles = () => {
-        gameTiles.forEach(tile => tile.setAttribute('disabled', ''));
+        gameTiles.forEach(tile => tile.setAttribute('disabled'));
     }
 
     const enableTiles = () => {
         gameTiles.forEach(tile => tile.removeAttribute('disabled'));
     }
 
-    const _init = (() => {
+    const _bindKeyInputs = () => {
         for (let i = 0; i < gameTiles.length; i++) {
-            tile = gameTiles[i];
-            tile.addEventListener('click', gameController.playerTurn.bind(tile, i));
+            let tile = gameTiles[i];
+            tile.addEventListener('click', gameController.playerTurn.bind(this, i));
         }
+    }
 
-        if (opponent) opponent.addEventListener('change', _changeOpponent, false);
-        controls.forEach(control => {
-            if (control.value === 'reset') control.addEventListener('click', gameController.restart)
-        });
+    const _init = (() => {
+        _bindKeyInputs();
 
-        x.addEventListener('click', _changePlayerSign.bind(this, 'X'));
-        o.addEventListener('click', _changePlayerSign.bind(this, 'O'));
+        opponent.addEventListener('change', _changeOpponent, false);
+        reset.addEventListener('click', gameController.restart)
+
+        x.addEventListener('click', _changePlayerFaction.bind(this, 'X'));
+        o.addEventListener('click', _changePlayerFaction.bind(this, 'O'));
     })();
 
     return {
@@ -280,7 +410,5 @@ const displayController = (() => {
         clearTiles,
     }
 })();
-
-gameController.switchFaction('X');
 
 const setAttributes = (elem, attrs) => { Object.entries(attrs).forEach(([key, value]) => elem.setAttribute(key, value)); }
