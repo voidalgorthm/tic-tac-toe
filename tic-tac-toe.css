@@ -75,7 +75,7 @@ div.container {
 div.wrapper {
     background-color: var(--default-bgcolor);
     border-radius: var(--border-radius);
-    max-width: 100%;
+    max-width: 95%;
     max-height: 100%;
     width: max(80ch, 40rem);
     height: max(90ch, 40rem);
@@ -136,16 +136,19 @@ div.faction {
 
 button.btn-faction {
     height: 4rem;
+    font-size: 3rem;
+}
+
+.selected {
+    background-color: var(--focus-bgcolor);
+    color: var(--focus-color);
 }
 
 div.board {
     background-color: var(--general-bgcolor);
     flex: 1;
+    z-index: 0;
     display: grid;
-    /* place-items: center; */
-    /* grid-template-columns: 6.5rem 6.5rem 6.5rem; */
-    /* grid-template-rows: 6.5rem 6.5rem 6.5rem; */
-    /* gap: 0.25rem; */
     align-content: center;
     justify-content: center;
 }
@@ -181,7 +184,7 @@ button.btn-game {
     background-color: var(--general-bgcolor);
     color: var(--default-color);
     border-radius: 0;
-    font-size: 2rem;
+    font-size: 5rem;
 }
 
 /* div.bottom {} */
