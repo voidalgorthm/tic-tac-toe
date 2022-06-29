@@ -25,7 +25,6 @@ const gameBoard = (() => {
         // gameTile.classList.add('marked');
         gameTile.textContent = player.getFaction();
         _board[num] = player.getFaction();
-        // gameTile.setAttribute('disabled', '');
     }
 
     const clearBoard = () => {
@@ -33,11 +32,11 @@ const gameBoard = (() => {
     }
 
     const getUnmarkedTilesAi = () => {
-        let tiles = [];
+        let unmarked = [];
         for (let i = 0; i < _board.length; i++) {
-            if (_board[i] === undefined) tiles.push(i);
+            if (_board[i] === undefined) unmarked.push(i);
         }
-        return tiles;
+        return unmarked;
     }
 
     const setTilesAi = (num, player) => {
@@ -59,21 +58,19 @@ const gameBoard = (() => {
 })();
 
 const minimaxAiPercent = ((percentage) => {
-    let aiPlayer = gameController.getPlayer1().getSentient() ? gameController.getPlayer2() : gameController.getPlayer1();
-
-    console.log(aiPlayer);
-    // if (!(gameController.determineVsHuman())) {
-    //     aiPlayer = _player1.getSentient() ? _player2 : _player1;
-    // }
-
     let aiPrecision = percentage;
+    let _aiPlayer, _humanPlayer;
+
+    const setAiPlayer = (player) => {
+        _aiPlayer = player;
+    }
+
+    const setHumanPlayer = (player) => {
+        _humanPlayer = player;
+    }
 
     const setAiPercentage = (percentage) => {
         aiPrecision = percentage;
-    }
-
-    const getAiPlayer = () => {
-        return aiPlayer;
     }
 
     const getAiPercentage = () => {
@@ -85,13 +82,12 @@ const minimaxAiPercent = ((percentage) => {
 
         let choice = null;
         if (value <= aiPrecision) {
-            console.log('AI choosing the best choice');
-            choice = minimax(gameBoard, getAiPlayer()).index;
-            const field = gameBoard.getTile(choice);
-            if (field !== undefined) return "error";
-        }
-        else {
-            console.log('AI most likely choosing the best choice');
+            console.log('Best choice');
+            choice = minimax(gameBoard, _aiPlayer).index;
+            const tile = gameBoard.getTile(choice);
+            if (tile !== undefined) return "error";
+        } else {
+            console.log('Random choice');
             const unmarkedTiles = gameBoard.getUnmarkedTilesAi();
             let averageMove = Math.floor(Math.random() * unmarkedTiles.length);
             choice = unmarkedTiles[averageMove];
@@ -99,9 +95,9 @@ const minimaxAiPercent = ((percentage) => {
         return choice;
     }
 
-    const findAiBestMove = (moves, aiPlayer) => {
+    const findAiBestMove = (moves, player) => {
         let bestMove;
-        if (aiPlayer === getAiPlayer()) {
+        if (player === _aiPlayer) {
             let bestScore = -10000;
             for (let i = 0; i < moves.length; i++) {
                 if (moves[i].score > bestScore) {
@@ -121,22 +117,20 @@ const minimaxAiPercent = ((percentage) => {
         return moves[bestMove];
     }
 
-    const minimax = (newBoard, aiPlayer) => {
+    const minimax = (hypoBoard, player) => {
 
-        let unmarked = newBoard.getUnmarkedTilesAi();
+        let unmarked = hypoBoard.getUnmarkedTilesAi();
 
-        if (gameController.validateDraw(newBoard)) {
+        if (gameController.validateDraw(hypoBoard)) {
             return {
                 score: 0
             };
-        }
-        else if (gameController.validateWin(newBoard)) {
-            if (aiPlayer.getFaction() == gameController.getHumanPlayer().getFaction()) {
+        } else if (gameController.validateWin(hypoBoard)) {
+            if (player.getFaction() == _humanPlayer.getFaction()) {
                 return {
                     score: 10
                 };
-            }
-            else if (aiPlayer.getFaction() == getAiPlayer().getFaction()) {
+            } else if (player.getFaction() == _aiPlayer.getFaction()) {
                 return {
                     score: -10
                 };
@@ -149,34 +143,40 @@ const minimaxAiPercent = ((percentage) => {
             let move = {};
             move.index = unmarked[i];
 
-            newBoard.setTilesAi(unmarked[i], aiPlayer);
+            hypoBoard.setTilesAi(unmarked[i], player);
 
-            if (aiPlayer.getFaction() === getAiPlayer().getFaction()) {
-                let result = minimax(newBoard, gameController.getHumanPlayer());
+            if (player.getFaction() === _aiPlayer.getFaction()) {
+                let result = minimax(hypoBoard, _humanPlayer);
+                move.score = result.score;
+            } else {
+                let result = minimax(hypoBoard, _aiPlayer);
                 move.score = result.score;
             }
-            else {
-                let result = minimax(newBoard, gameController.aiPlayer);
-                move.score = result.score;
-            }
 
-            newBoard.setTilesAi(unmarked[i], undefined);
+            hypoBoard.setTilesAi(unmarked[i], undefined);
             moves.push(move);
         }
-        return findAiBestMove(moves, aiPlayer);
+
+        return findAiBestMove(moves, player);
     }
     return {
-        minimax,
+        setAiPlayer,
+        setHumanPlayer,
         chooseAiTile,
         getAiPercentage,
-        setAiPercentage
+        setAiPercentage,
+        minimax,
     }
 })(0);
 
 const gameController = (() => {
-
-    let _player1 = Player('X', true), _player2 = Player('O');
     const _aiLogic = minimaxAiPercent;
+    let _player1 = Player('X', true), _player2 = Player('O');
+
+    const getPlayer1 = () => _player1;
+    const getPlayer2 = () => _player2;
+    let counter = 0;
+
     const _sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     const vsPlayer = () => {
@@ -184,23 +184,39 @@ const gameController = (() => {
         _player2 = Player('O', true);
     }
 
-    let counter = 0;
-    const getPlayer1 = () => _player1;
-    const getPlayer2 = () => _player2;
+    const _sendPlayers = () => {
+        const humanPlayer = _determineHumanPlayer();
+        _aiLogic.setHumanPlayer(humanPlayer);
+        const aiPlayer = _determineAiPlayer();
+        _aiLogic.setAiPlayer(aiPlayer);
+    }
 
-    const switchFaction = (faction) => {
-        if (determineVsHuman()) {
-            if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
-            else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
-            else throw 'Incorrect faction';
-        } else {
-            _player1.setFaction('X', true), _player2.setFaction('O', true);
-        }
+    const _determineHumanPlayer = () => {
+        let _humanPlayer;
+        if (getPlayer1().getSentient()) _humanPlayer = getPlayer1();
+        else if (getPlayer2().getSentient()) _humanPlayer = getPlayer2();
+        return _humanPlayer;
+    }
+
+    const _determineAiPlayer = () => {
+        let _aiPlayer;
+        if (getPlayer1().getSentient()) _aiPlayer = getPlayer2();
+        else if (getPlayer2().getSentient()) _aiPlayer = getPlayer1();
+        return _aiPlayer;
     }
 
     const determineVsHuman = () => {
         if (getPlayer1().getSentient() && getPlayer2().getSentient()) return true;
         return false;
+    }
+
+    const switchFaction = (faction) => {
+        if (determineVsHuman()) _player1.setFaction('X', true), _player2.setFaction('O', true);
+        else {
+            if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
+            else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
+            else throw 'Incorrect faction';
+        }
     }
 
     const playerTurn = (num) => {
@@ -211,11 +227,9 @@ const gameController = (() => {
 
         let newPlayer;
         if (determineVsHuman()) {
-            console.log('git')
             if (count === 0) nextPlayer = _player2, newPlayer = _player1;
             else if (count === 1) nextPlayer = _player1, newPlayer = _player2;
         } else {
-            console.log('gud')
             if (_player1.getSentient()) newPlayer = _player1;
             else if (_player2.getSentient()) newPlayer = _player2;
         }
@@ -229,12 +243,14 @@ const gameController = (() => {
                     gameEnd(newPlayer.getFaction());
                 })();
             }
+
             else if (validateDraw(gameBoard)) {
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
                     gameEnd("Draw");
                 })();
             }
+
             else {
                 displayController.disableTiles;
                 (async () => {
@@ -245,6 +261,7 @@ const gameController = (() => {
                         displayController.bindKeyInputs();
                     }
                     else {
+                        _sendPlayers();
                         aiTurn();
                     }
 
@@ -257,9 +274,7 @@ const gameController = (() => {
         const num = _aiLogic.chooseAiTile();
         let player;
 
-        if (!(determineVsHuman())) {
-            player = _player1.getSentient() ? _player2 : _player1;
-        }
+        if (!(determineVsHuman())) player = _player1.getSentient() ? _player2 : _player1;
 
         gameBoard.setTile(num, player);
 
@@ -268,8 +283,8 @@ const gameController = (() => {
                 await _sleep(500 + (Math.random() * 500));
                 gameEnd(player.getFaction())
             })();
-
         }
+
         else if (validateDraw(gameBoard)) {
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
@@ -305,6 +320,7 @@ const gameController = (() => {
         diagonal2 = [board.getTile(2), board.getTile(4), board.getTile(6)];
         if (diagonal1.every(tile => tile === 'X') || diagonal1.every(tile => tile === 'O')) return true;
         else if (diagonal2.every(tile => tile === 'X') || diagonal2.every(tile => tile === 'O')) return true;
+        return false;
     }
 
     const validateDraw = (board) => {
@@ -356,10 +372,10 @@ const gameController = (() => {
 
         gameBoard.clearBoard();
         displayController.clearTiles();
-        if ((!determineVsHuman()) && _player2.getSentient()) {
+        displayController.enableTiles();
+        if (_determineHumanPlayer().getFaction() === 'O') {
             aiTurn();
         }
-        displayController.enableTiles();
         console.log('reset');
 
         // card.classList.remove('blur');
@@ -375,11 +391,11 @@ const gameController = (() => {
         vsPlayer,
         getPlayer1,
         getPlayer2,
-        switchFaction,
         determineVsHuman,
+        switchFaction,
+        playerTurn,
         validateDraw,
         validateWin,
-        playerTurn,
         reset,
     }
 })();
@@ -420,7 +436,7 @@ const displayController = (() => {
             case 'impossible': minimaxAiPercent.setAiPercentage(100); break;
             case 'player': gameController.vsPlayer(); break;
         }
-        console.log(`AI at ${minimaxAiPercent.getAiPercentage()} competence`);
+        console.log(`AI at ${minimaxAiPercent.getAiPercentage()}\% competence`);
         gameController.reset();
     }
 
@@ -437,6 +453,7 @@ const displayController = (() => {
     }
 
     const _init = (() => {
+        console.log(`AI at ${minimaxAiPercent.getAiPercentage()}\% competence`);
         bindKeyInputs();
         opponent.addEventListener('change', _changeOpponent, false);
         x.addEventListener('click', _changePlayerFaction.bind(this, 'X'));
