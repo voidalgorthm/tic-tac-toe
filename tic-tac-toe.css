@@ -128,7 +128,6 @@ div.title {
     font-size: 2rem;
 }
 
-
 div.faction {
     display: flex;
     gap: 1rem;
@@ -144,13 +143,34 @@ button.btn-faction {
     color: var(--focus-color);
 }
 
-div.board {
+div.board,
+div.overlay {
     background-color: var(--general-bgcolor);
     flex: 1;
-    z-index: 0;
     display: grid;
-    align-content: center;
-    justify-content: center;
+    place-items: center;
+}
+
+div.board {
+    z-index: 0;
+    position: relative;
+}
+
+div.overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+    z-index: 1;
+    grid-template-rows: 3fr 1fr;
+}
+
+div.output {
+    font-size: 12rem;
+}
+
+div.results {
+    font-size: 5rem
 }
 
 table {
@@ -165,19 +185,23 @@ td {
 }
 
 table tr:first-child td {
-    border-top: 0.5rem solid var(--general-bgcolor);;
+    border-top: 0.5rem solid var(--general-bgcolor);
+    ;
 }
 
 table tr:last-child td {
-    border-bottom: 0.5rem solid var(--general-bgcolor);;
+    border-bottom: 0.5rem solid var(--general-bgcolor);
+    ;
 }
 
 table tr td:first-child {
-    border-left: 0.5rem solid var(--general-bgcolor);;
+    border-left: 0.5rem solid var(--general-bgcolor);
+    ;
 }
 
 table tr td:last-child {
-    border-right: 0.5rem solid var(--general-bgcolor);;
+    border-right: 0.5rem solid var(--general-bgcolor);
+    ;
 }
 
 button.btn-game {

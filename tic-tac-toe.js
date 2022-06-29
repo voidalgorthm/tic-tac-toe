@@ -172,6 +172,9 @@ const minimaxAiPercent = ((percentage) => {
 const gameController = (() => {
     const _aiLogic = minimaxAiPercent;
     let _player1 = Player('X', true), _player2 = Player('O');
+    let _lastHumanFaction;
+
+
 
     const getPlayer1 = () => _player1;
     const getPlayer2 = () => _player2;
@@ -180,18 +183,29 @@ const gameController = (() => {
     const _sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     const vsPlayer = () => {
+        _lastHumanFaction = determineHumanPlayer().getFaction();
         _player1 = Player('X', true);
         _player2 = Player('O', true);
     }
 
+    const vsAi = (faction) => {
+        if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
+        else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
+        else throw 'Incorrect faction';
+    }
+
+    const getLastHuman = () => {
+        return _lastHumanFaction;
+    }
+
     const _sendPlayers = () => {
-        const humanPlayer = _determineHumanPlayer();
+        const humanPlayer = determineHumanPlayer();
         _aiLogic.setHumanPlayer(humanPlayer);
         const aiPlayer = _determineAiPlayer();
         _aiLogic.setAiPlayer(aiPlayer);
     }
 
-    const _determineHumanPlayer = () => {
+    const determineHumanPlayer = () => {
         let _humanPlayer;
         if (getPlayer1().getSentient()) _humanPlayer = getPlayer1();
         else if (getPlayer2().getSentient()) _humanPlayer = getPlayer2();
@@ -213,9 +227,7 @@ const gameController = (() => {
     const switchFaction = (faction) => {
         if (determineVsHuman()) _player1.setFaction('X', true), _player2.setFaction('O', true);
         else {
-            if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
-            else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
-            else throw 'Incorrect faction';
+            vsAi(faction);
         }
     }
 
@@ -223,31 +235,30 @@ const gameController = (() => {
         const tile = gameBoard.getTile(num);
         if (tile !== undefined) console.log('Tile already filled');
         let count = counter % 2;
-        let nextPlayer;
 
-        let newPlayer;
+        let player;
         if (determineVsHuman()) {
-            if (count === 0) nextPlayer = _player2, newPlayer = _player1;
-            else if (count === 1) nextPlayer = _player1, newPlayer = _player2;
+            if (count === 0) player = _player1;
+            else if (count === 1) player = _player2;
         } else {
-            if (_player1.getSentient()) newPlayer = _player1;
-            else if (_player2.getSentient()) newPlayer = _player2;
+            if (_player1.getSentient()) player = _player1;
+            else if (_player2.getSentient()) player = _player2;
         }
 
         if (tile === undefined) {
-            gameBoard.setTile(num, newPlayer);
+            gameBoard.setTile(num, player);
 
             if (validateWin(gameBoard)) {
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
-                    gameEnd(newPlayer.getFaction());
+                    gameEnd(player.getFaction());
                 })();
             }
 
             else if (validateDraw(gameBoard)) {
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
-                    gameEnd("Draw");
+                    gameEnd('draw');
                 })();
             }
 
@@ -288,7 +299,7 @@ const gameController = (() => {
         else if (validateDraw(gameBoard)) {
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
-                gameEnd("Draw");
+                gameEnd('draw');
             })();
         }
     }
@@ -339,58 +350,52 @@ const gameController = (() => {
 
     const gameEnd = function (faction) {
 
-        /* const card = document.querySelector('.card');
-        card.classList.remove('unblur');
-        card.classList.add('blur');
+        const board = document.querySelector('.board');
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        const output = document.createElement('div');
+        const results = document.createElement('div');
+        output.className = 'output';
+        results.className = 'results';
 
-        const winElements = document.querySelectorAll('.win p')
 
-        if (faction == "Draw") {
-            winElements[3].classList.remove('hide');
-            console.log("Its a draw");
-        }
-        else {
-            console.log(`The winner is player ${faction}`);
-            winElements[0].classList.remove('hide');
-            if(faction.toLowerCase() == 'x'){
-                winElements[1].classList.remove('hide');
-            }
-            else{
-                winElements[2].classList.remove('hide');
-            }
-        } */
-        console.log('end');
-        // displayController.disableTiles;
+        output.textContent = (faction === 'draw') ? 'XO' : (faction === 'X') ? 'X' : (faction === 'O') ? 'O' : 'Incorrect faction';
+        results.textContent = (faction === 'draw') ? 'DRAW!' : (faction === 'X' || faction === 'O') ? 'WINNER!' : 'Unknown status';
+
+        overlay.appendChild(output);
+        overlay.appendChild(results);
+        board.appendChild(overlay);
+
+        displayController.disableTiles;
+        overlay.addEventListener('click', () => {
+            (async () => {
+                await _sleep(500 + (Math.random() * 500));
+                board.removeChild(overlay);
+                reset();
+            })();
+
+        })
+        console.log('Game End');
     }
 
     const reset = async function () {
 
-        // const card = document.querySelector('.card');
-        // const winElements = document.querySelectorAll('.win p');
-
-        // card.classList.add('unblur');
-
         gameBoard.clearBoard();
         displayController.clearTiles();
         displayController.enableTiles();
-        if (_determineHumanPlayer().getFaction() === 'O') {
+        if (determineHumanPlayer().getFaction() === 'O') {
             aiTurn();
         }
-        console.log('reset');
-
-        // card.classList.remove('blur');
-        /* 
-                winElements.forEach(element => {
-                    element.classList.add('hide');
-                });
-                document.body.removeEventListener('click', gameController.reset); */
-
+        console.log('Game Reset');
     }
 
     return {
-        vsPlayer,
         getPlayer1,
         getPlayer2,
+        vsPlayer,
+        vsAi,
+        getLastHuman,
+        determineHumanPlayer,
         determineVsHuman,
         switchFaction,
         playerTurn,
@@ -419,12 +424,16 @@ const displayController = (() => {
 
     const _changePlayerFaction = (faction) => {
         gameController.switchFaction(faction);
+        _changeButtonSelected(faction);
+        gameController.reset();
+    }
+
+    const _changeButtonSelected = (faction) => {
         const buttons = document.querySelectorAll('button.btn-faction');
         buttons.forEach(button => {
             if (button.value === faction) button.classList.add('selected');
             else button.classList.remove('selected');
         });
-        gameController.reset();
     }
 
     const _changeOpponent = (event) => {
@@ -437,6 +446,14 @@ const displayController = (() => {
             case 'player': gameController.vsPlayer(); break;
         }
         console.log(`AI at ${minimaxAiPercent.getAiPercentage()}\% competence`);
+        const buttons = document.querySelectorAll('button.btn-faction');
+
+        if (difficulty === 'player') buttons.forEach(button => button.classList.remove('selected'));
+        else {
+            const lastFaction = gameController.getLastHuman();
+            _changeButtonSelected(lastFaction);
+            gameController.vsAi(lastFaction);
+        }
         gameController.reset();
     }
 
