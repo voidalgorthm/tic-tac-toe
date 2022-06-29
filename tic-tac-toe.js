@@ -172,12 +172,7 @@ const minimaxAiPercent = ((percentage) => {
 const gameController = (() => {
     const _aiLogic = minimaxAiPercent;
     let _player1 = Player('X', true), _player2 = Player('O');
-<<<<<<< HEAD
     let _lastHumanFaction;
-
-
-=======
->>>>>>> origin/main
 
     const getPlayer1 = () => _player1;
     const getPlayer2 = () => _player2;
@@ -191,7 +186,6 @@ const gameController = (() => {
         _player2 = Player('O', true);
     }
 
-<<<<<<< HEAD
     const vsAi = (faction) => {
         if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
         else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
@@ -210,16 +204,6 @@ const gameController = (() => {
     }
 
     const determineHumanPlayer = () => {
-=======
-    const _sendPlayers = () => {
-        const humanPlayer = _determineHumanPlayer();
-        _aiLogic.setHumanPlayer(humanPlayer);
-        const aiPlayer = _determineAiPlayer();
-        _aiLogic.setAiPlayer(aiPlayer);
-    }
-
-    const _determineHumanPlayer = () => {
->>>>>>> origin/main
         let _humanPlayer;
         if (getPlayer1().getSentient()) _humanPlayer = getPlayer1();
         else if (getPlayer2().getSentient()) _humanPlayer = getPlayer2();
@@ -241,13 +225,7 @@ const gameController = (() => {
     const switchFaction = (faction) => {
         if (determineVsHuman()) _player1.setFaction('X', true), _player2.setFaction('O', true);
         else {
-<<<<<<< HEAD
             vsAi(faction);
-=======
-            if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
-            else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
-            else throw 'Incorrect faction';
->>>>>>> origin/main
         }
     }
 
@@ -258,19 +236,11 @@ const gameController = (() => {
 
         let player;
         if (determineVsHuman()) {
-<<<<<<< HEAD
             if (count === 0) player = _player1;
             else if (count === 1) player = _player2;
         } else {
             if (_player1.getSentient()) player = _player1;
             else if (_player2.getSentient()) player = _player2;
-=======
-            if (count === 0) nextPlayer = _player2, newPlayer = _player1;
-            else if (count === 1) nextPlayer = _player1, newPlayer = _player2;
-        } else {
-            if (_player1.getSentient()) newPlayer = _player1;
-            else if (_player2.getSentient()) newPlayer = _player2;
->>>>>>> origin/main
         }
 
         if (tile === undefined) {
@@ -398,7 +368,6 @@ const gameController = (() => {
         overlay.addEventListener('click', () => {
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
-                board.removeChild(overlay);
                 reset();
             })();
 
@@ -407,41 +376,26 @@ const gameController = (() => {
     }
 
     const reset = async function () {
+        const board = document.querySelector('.board');
+        const overlay = board.querySelector('.overlay');
+        board.removeChild(overlay);
 
         gameBoard.clearBoard();
         displayController.clearTiles();
-        displayController.enableTiles();
-<<<<<<< HEAD
         if (determineHumanPlayer().getFaction() === 'O') {
             aiTurn();
         }
+        displayController.enableTiles();
         console.log('Game Reset');
-=======
-        if (_determineHumanPlayer().getFaction() === 'O') {
-            aiTurn();
-        }
-        console.log('reset');
-
-        // card.classList.remove('blur');
-        /* 
-                winElements.forEach(element => {
-                    element.classList.add('hide');
-                });
-                document.body.removeEventListener('click', gameController.reset); */
-
->>>>>>> origin/main
     }
 
     return {
         getPlayer1,
         getPlayer2,
-<<<<<<< HEAD
         vsPlayer,
         vsAi,
         getLastHuman,
         determineHumanPlayer,
-=======
->>>>>>> origin/main
         determineVsHuman,
         switchFaction,
         playerTurn,
@@ -458,6 +412,7 @@ const displayController = (() => {
     const reset = document.querySelector('button#reset');
     const x = document.querySelector('#x');
     const o = document.querySelector('#o');
+    let _fromPlayer = false;
 
     const getSelectValue = () => opponent.value;
 
@@ -492,17 +447,14 @@ const displayController = (() => {
             case 'player': gameController.vsPlayer(); break;
         }
         console.log(`AI at ${minimaxAiPercent.getAiPercentage()}\% competence`);
-<<<<<<< HEAD
         const buttons = document.querySelectorAll('button.btn-faction');
 
-        if (difficulty === 'player') buttons.forEach(button => button.classList.remove('selected'));
-        else {
+        if (difficulty === 'player') buttons.forEach(button => button.classList.remove('selected')), _fromPlayer = true;
+        if (difficulty !== 'player' && _fromPlayer === true) {
             const lastFaction = gameController.getLastHuman();
             _changeButtonSelected(lastFaction);
             gameController.vsAi(lastFaction);
         }
-=======
->>>>>>> origin/main
         gameController.reset();
     }
 
