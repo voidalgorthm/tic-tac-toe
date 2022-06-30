@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap');
+
 :root {
     font-size: 62.5%;
     --default-bgcolor: #f1f5f9;
@@ -13,7 +15,7 @@
 
     --valid-color: #22c55e;
     --invalid-color: #dc2626;
-    --general-theme-font: monospace, serif, sans-serif;
+    --general-theme-font: 'Raleway', Monospace, sans-serif;
 
     --border-radius: 1rem;
 }
@@ -44,6 +46,7 @@ select {
 button {
     background-color: var(--button-bgcolor);
     outline-color: var(--general-bgcolor);
+    font-family: var(--general-theme-font);
     outline-width: thick;
     width: 100%;
     height: 100%;
@@ -63,6 +66,7 @@ button:active:not(:disabled) {
 div.container {
     background-color: var(--fade-bgcolor);
     color: var(--default-color);
+    font-family: var(--general-theme-font);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -102,11 +106,11 @@ div.selection:after {
 div.selection {
     width: 100%;
     min-width: 10ch;
-    max-width: 20ch;
+    max-width: 15ch;
     border: 1px solid #777;
     border-radius: 0.5rem;
     padding: 0.25rem 0.5rem;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     cursor: pointer;
     background-color: var(--default-bgcolor);
     display: grid;
@@ -244,7 +248,7 @@ button.btn-controls {
         transform: scale(0);
         opacity: 0.2;
     }
-    
+
     100% {
         transform: scale(1);
         opacity: 1;
