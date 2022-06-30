@@ -16,15 +16,20 @@ const Player = (faction, sentient = false) => {
 }
 
 const gameBoard = (() => {
+    const _sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); }
     let _board = [...Array(9)];
     const getBoard = () => _board;
     const getTile = (num) => _board[num];
     const setTile = (num, player) => {
         const gameTiles = document.querySelectorAll(`button.btn-game`);
         const gameTile = gameTiles.item(num);
-        // gameTile.classList.add('marked');
-        gameTile.textContent = player.getFaction();
+        const p = gameTile.querySelector('p')
+        p.classList.add('marked');
+        p.textContent = player.getFaction();
         _board[num] = player.getFaction();
+        p.addEventListener('animationend', () => {
+            p.classList.remove('marked');
+        });
     }
 
     const clearBoard = () => {
@@ -360,6 +365,7 @@ const gameController = (() => {
         output.textContent = (faction === 'draw') ? 'XO' : (faction === 'X') ? 'X' : (faction === 'O') ? 'O' : 'Incorrect faction';
         results.textContent = (faction === 'draw') ? 'DRAW!' : (faction === 'X' || faction === 'O') ? 'WINNER!' : 'Unknown status';
 
+        overlay.classList.add('upscale');
         overlay.appendChild(output);
         overlay.appendChild(results);
         board.appendChild(overlay);
@@ -368,6 +374,9 @@ const gameController = (() => {
         overlay.addEventListener('click', () => {
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
+                overlay.addEventListener('animationend', () => {
+                    overlay.classList.remove('upscale');
+                });
                 reset();
             })();
 
@@ -378,7 +387,7 @@ const gameController = (() => {
     const reset = async function () {
         const board = document.querySelector('.board');
         const overlay = board.querySelector('.overlay');
-        board.removeChild(overlay);
+        if(overlay) board.removeChild(overlay);
 
         gameBoard.clearBoard();
         displayController.clearTiles();
@@ -451,6 +460,7 @@ const displayController = (() => {
 
         if (difficulty === 'player') buttons.forEach(button => button.classList.remove('selected')), _fromPlayer = true;
         if (difficulty !== 'player' && _fromPlayer === true) {
+            _fromPlayer = false;
             const lastFaction = gameController.getLastHuman();
             _changeButtonSelected(lastFaction);
             gameController.vsAi(lastFaction);
@@ -459,7 +469,7 @@ const displayController = (() => {
     }
 
     const clearTiles = () => {
-        gameTiles.forEach(tile => tile.textContent = '');
+        gameTiles.forEach(tile => tile.querySelector('p').textContent = '');
     }
 
     const disableTiles = () => {
