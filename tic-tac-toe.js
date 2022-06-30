@@ -178,10 +178,11 @@ const gameController = (() => {
     const _aiLogic = minimaxAiPercent;
     let _player1 = Player('X', true), _player2 = Player('O');
     let _lastHumanFaction;
+    let counter = 0;
+    let turn = true;
 
     const getPlayer1 = () => _player1;
     const getPlayer2 = () => _player2;
-    let counter = 0;
 
     const _sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); }
 
@@ -195,6 +196,13 @@ const gameController = (() => {
         if (faction === 'X') _player1.setFaction('X', true), _player2.setFaction('O');
         else if (faction === 'O') _player2.setFaction('O', true), _player1.setFaction('X');
         else throw 'Incorrect faction';
+    }
+
+    const _turnSwitch = (faction) => {
+        let sign;
+        if (faction === 'X' && turn) sign = 'O';
+        else if (faction === 'O' && !turn) sign = 'X';
+        displayController.changeButtonTurn(sign);
     }
 
     const getLastHuman = () => {
@@ -235,41 +243,27 @@ const gameController = (() => {
     }
 
     const playerTurn = (num) => {
+        turn = true;
         const tile = gameBoard.getTile(num);
-        if (tile !== undefined) console.log('Tile already filled');
         let count = counter % 2;
 
-        let player;
+        let player, nextPlayer;
         if (determineVsHuman()) {
-            if (count === 0) player = _player1;
-            else if (count === 1) player = _player2;
+            if (count === 0) player = _player1, nextPlayer = _player2;
+            else if (count === 1) player = _player2, nextPlayer = _player1;
         } else {
-            if (_player1.getSentient()) player = _player1;
-            else if (_player2.getSentient()) player = _player2;
+            if (_player1.getSentient()) player = _player1, nextPlayer = _player2;
+            else if (_player2.getSentient()) player = _player2, nextPlayer = _player1;
         }
 
         if (tile === undefined) {
             gameBoard.setTile(num, player);
 
-            if (validateWin(gameBoard)) {
+            if (_validateConclusion(gameBoard, player) === false) {
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
-                    gameEnd(player.getFaction());
-                })();
-            }
-
-            else if (validateDraw(gameBoard)) {
-                (async () => {
-                    await _sleep(500 + (Math.random() * 500));
-                    gameEnd('draw');
-                })();
-            }
-
-            else {
-                displayController.disableTiles;
-                (async () => {
-                    await _sleep(250 + (Math.random() * 300));
                     displayController.enableTiles;
+                    _turnSwitch(player.getFaction());
                     if (determineVsHuman()) {
                         ++counter;
                         displayController.bindKeyInputs();
@@ -278,33 +272,41 @@ const gameController = (() => {
                         _sendPlayers();
                         aiTurn();
                     }
-
                 })();
             }
-        }
+        } else throw 'Tile already filled';
     }
 
     const aiTurn = () => {
+        turn = false;
+        let player, nextPlayer;
+        if (!(determineVsHuman())) {
+            player = _player1.getSentient() ? _player2 : _player1;
+            nextPlayer = _player1.getSentient() ? _player1 : _player2;
+        }
+
         const num = _aiLogic.chooseAiTile();
-        let player;
-
-        if (!(determineVsHuman())) player = _player1.getSentient() ? _player2 : _player1;
-
         gameBoard.setTile(num, player);
 
-        if (validateWin(gameBoard)) {
+        if (_validateConclusion(gameBoard, player) === false) _turnSwitch(player.getFaction());
+    }
+
+    const _validateConclusion = (board, player) => {
+        if (validateWin(board)) {
+            displayController.disableTiles();
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
                 gameEnd(player.getFaction())
             })();
         }
-
-        else if (validateDraw(gameBoard)) {
+        else if (validateDraw(board)) {
+            displayController.disableTiles();
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
                 gameEnd('draw');
             })();
         }
+        else return false;
     }
 
     const _validateRows = (board) => {
@@ -348,10 +350,11 @@ const gameController = (() => {
 
     const validateWin = (board) => {
         if (_validateRows(board) || _validateColumns(board) || _validateDiagonals(board)) return true;
-        return false;
+        else return false;
     }
 
     const gameEnd = function (faction) {
+        displayController.disableTiles();
 
         const board = document.querySelector('.board');
         const overlay = document.createElement('div');
@@ -370,7 +373,6 @@ const gameController = (() => {
         overlay.appendChild(results);
         board.appendChild(overlay);
 
-        displayController.disableTiles;
         overlay.addEventListener('click', () => {
             (async () => {
                 await _sleep(500 + (Math.random() * 500));
@@ -381,21 +383,22 @@ const gameController = (() => {
             })();
 
         })
-        console.log('Game End');
+        console.log('End');
     }
 
     const reset = async function () {
         const board = document.querySelector('.board');
         const overlay = board.querySelector('.overlay');
-        if(overlay) board.removeChild(overlay);
+        if (overlay) board.removeChild(overlay);
 
         gameBoard.clearBoard();
         displayController.clearTiles();
+
         if (determineHumanPlayer().getFaction() === 'O') {
             aiTurn();
         }
+        console.log('Reset');
         displayController.enableTiles();
-        console.log('Game Reset');
     }
 
     return {
@@ -417,8 +420,8 @@ const gameController = (() => {
 const displayController = (() => {
     const gameTiles = [...(document.querySelectorAll('button.btn-game'))];
     const opponent = document.querySelector('select#opponent');
-    // let difficulty;
     const reset = document.querySelector('button#reset');
+    const factions = document.querySelectorAll('button.btn-faction');
     const x = document.querySelector('#x');
     const o = document.querySelector('#o');
     let _fromPlayer = false;
@@ -439,11 +442,23 @@ const displayController = (() => {
     }
 
     const _changeButtonSelected = (faction) => {
-        const buttons = document.querySelectorAll('button.btn-faction');
-        buttons.forEach(button => {
-            if (button.value === faction) button.classList.add('selected');
-            else button.classList.remove('selected');
+        factions.forEach(button => {
+            if (button.value === faction) button.classList.add('human');
+            else button.classList.remove('human');
         });
+    }
+
+    const getFactionButtons = () => {
+        return factions;
+    }
+
+    const changeButtonTurn = (faction) => {
+        // console.log(faction);
+        factions.forEach(button => {
+            if (button.value === faction) button.classList.add('turn');
+            else button.classList.remove('turn');
+        });
+        // console.log(factions);
     }
 
     const _changeOpponent = (event) => {
@@ -456,9 +471,8 @@ const displayController = (() => {
             case 'player': gameController.vsPlayer(); break;
         }
         console.log(`AI at ${minimaxAiPercent.getAiPercentage()}\% competence`);
-        const buttons = document.querySelectorAll('button.btn-faction');
 
-        if (difficulty === 'player') buttons.forEach(button => button.classList.remove('selected')), _fromPlayer = true;
+        if (difficulty === 'player') factions.forEach(button => button.classList.remove('human')), _fromPlayer = true;
         if (difficulty !== 'player' && _fromPlayer === true) {
             _fromPlayer = false;
             const lastFaction = gameController.getLastHuman();
@@ -473,7 +487,7 @@ const displayController = (() => {
     }
 
     const disableTiles = () => {
-        gameTiles.forEach(tile => tile.setAttribute('disabled'));
+        gameTiles.forEach(tile => tile.setAttribute('disabled', ''));
     }
 
     const enableTiles = () => {
@@ -493,6 +507,8 @@ const displayController = (() => {
     return {
         getSelectValue,
         bindKeyInputs,
+        changeButtonTurn,
+        getFactionButtons,
         clearTiles,
         disableTiles,
         enableTiles,
