@@ -1,13 +1,16 @@
 :root {
     font-size: 62.5%;
-    --default-bgcolor: #FFF;
-    --default-color: #222222;
+    --default-bgcolor: #f1f5f9;
+    --default-color: #000;
+
     --fade-bgcolor: #cbd5e1;
-    --general-bgcolor: #ef4444;
-    --button-bgcolor: #00a4b6;
-    --focus-bgcolor: #1f2937;
-    --focus-color: #f8fafc;
-    --division-bgcolor: #b91c1c;
+    --general-bgcolor: #b91c1c;
+    --division-bgcolor: #7f1d1d;
+    --button-bgcolor: #d97706;
+    --selected-bgcolor: #ef4444;
+    --focus-bgcolor: #92400e;
+    --focus-color: #f1f5f9;
+
     --valid-color: #22c55e;
     --invalid-color: #dc2626;
     --general-theme-font: monospace, serif, sans-serif;
@@ -46,11 +49,6 @@ button {
     height: 100%;
     border: 0;
     border-radius: var(--border-radius);
-}
-
-button:focus {
-    background-color: var(--focus-bgcolor);
-    color: var(--focus-color);
 }
 
 button:active:not(:disabled) {
@@ -137,7 +135,7 @@ div.faction {
 button.btn-faction {
     height: 4rem;
     font-size: 3rem;
-    border: .3rem solid transparent;
+    border: .5rem solid transparent;
 }
 
 button.btn-faction.turn {
@@ -145,8 +143,7 @@ button.btn-faction.turn {
 }
 
 .human {
-    background-color: var(--focus-bgcolor);
-    color: var(--focus-color);
+    background-color: var(--selected-bgcolor);
 }
 
 div.board,
@@ -220,8 +217,6 @@ button.btn-game {
 .upscale {
     animation: 1s upscale;
 }
-
-/* div.bottom {} */
 
 button.btn-controls {
     height: 4rem;
