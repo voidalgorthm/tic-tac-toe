@@ -16,7 +16,6 @@ const Player = (faction, sentient = false) => {
 }
 
 const gameBoard = (() => {
-    const _sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); }
     let _board = [...Array(9)];
     const getBoard = () => _board;
     const getTile = (num) => _board[num];
@@ -178,8 +177,8 @@ const gameController = (() => {
     const _aiLogic = minimaxAiPercent;
     let _player1 = Player('X', true), _player2 = Player('O');
     let _lastHumanFaction;
-    let counter = 0;
-    let turn = true;
+    let _counter = 0;
+    let _turn = true;
 
     const getPlayer1 = () => _player1;
     const getPlayer2 = () => _player2;
@@ -198,10 +197,10 @@ const gameController = (() => {
         else throw 'Incorrect faction';
     }
 
-    const _turnSwitch = (faction) => {
+    const _turnSwitch = () => {
         let sign;
-        if (faction === 'X' && turn) sign = 'O';
-        else if (faction === 'O' && !turn) sign = 'X';
+        if (_turn) sign = 'O';
+        else if (!_turn) sign = 'X';
         displayController.changeButtonTurn(sign);
     }
 
@@ -237,15 +236,15 @@ const gameController = (() => {
 
     const switchFaction = (faction) => {
         if (determineVsHuman()) _player1.setFaction('X', true), _player2.setFaction('O', true);
-        else {
-            vsAi(faction);
-        }
+        else vsAi(faction);
+        
     }
 
     const playerTurn = (num) => {
-        turn = true;
+        let count = _counter % 2;
+        _turn = (count === 0 ) ? true : false;
+        _turnSwitch();
         const tile = gameBoard.getTile(num);
-        let count = counter % 2;
 
         let player, nextPlayer;
         if (determineVsHuman()) {
@@ -263,9 +262,8 @@ const gameController = (() => {
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
                     displayController.enableTiles;
-                    _turnSwitch(player.getFaction());
                     if (determineVsHuman()) {
-                        ++counter;
+                        ++_counter;
                         displayController.bindKeyInputs();
                     }
                     else {
@@ -278,7 +276,8 @@ const gameController = (() => {
     }
 
     const aiTurn = () => {
-        turn = false;
+        _turn = false;
+        _turnSwitch();
         let player, nextPlayer;
         if (!(determineVsHuman())) {
             player = _player1.getSentient() ? _player2 : _player1;
@@ -288,7 +287,7 @@ const gameController = (() => {
         const num = _aiLogic.chooseAiTile();
         gameBoard.setTile(num, player);
 
-        if (_validateConclusion(gameBoard, player) === false) _turnSwitch(player.getFaction());
+        _validateConclusion(gameBoard, player);
     }
 
     const _validateConclusion = (board, player) => {
@@ -391,12 +390,13 @@ const gameController = (() => {
         const overlay = board.querySelector('.overlay');
         if (overlay) board.removeChild(overlay);
 
+        _counter = 0;
+        displayController.changeButtonTurn('X');
         gameBoard.clearBoard();
         displayController.clearTiles();
 
-        if (determineHumanPlayer().getFaction() === 'O') {
-            aiTurn();
-        }
+        if (determineHumanPlayer().getFaction() === 'O') aiTurn();
+        
         console.log('Reset');
         displayController.enableTiles();
     }
@@ -448,17 +448,11 @@ const displayController = (() => {
         });
     }
 
-    const getFactionButtons = () => {
-        return factions;
-    }
-
     const changeButtonTurn = (faction) => {
-        // console.log(faction);
         factions.forEach(button => {
             if (button.value === faction) button.classList.add('turn');
             else button.classList.remove('turn');
         });
-        // console.log(factions);
     }
 
     const _changeOpponent = (event) => {
@@ -473,7 +467,7 @@ const displayController = (() => {
         console.log(`AI at ${minimaxAiPercent.getAiPercentage()}\% competence`);
 
         if (difficulty === 'player') factions.forEach(button => button.classList.remove('human')), _fromPlayer = true;
-        if (difficulty !== 'player' && _fromPlayer === true) {
+        else if (difficulty !== 'player' && _fromPlayer === true) {
             _fromPlayer = false;
             const lastFaction = gameController.getLastHuman();
             _changeButtonSelected(lastFaction);
@@ -508,7 +502,6 @@ const displayController = (() => {
         getSelectValue,
         bindKeyInputs,
         changeButtonTurn,
-        getFactionButtons,
         clearTiles,
         disableTiles,
         enableTiles,
